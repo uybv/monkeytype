@@ -298,8 +298,13 @@ function countChars() {
     }
     if (TestLogic.input.getHistory(i) == word) {
       //the word is correct
-      correctWordChars += word.length;
-      correctChars += word.length;
+      if (Config.language.split("_")[0] == "vietnamese") {
+        correctWordChars += TestLogic.vn2telex(word).length;
+        correctChars += TestLogic.vn2telex(word).length;
+      } else {
+        correctWordChars += word.length;
+        correctChars += word.length;
+      }
       if (
         i < TestLogic.input.history.length - 1 &&
         Misc.getLastChar(TestLogic.input.getHistory(i)) !== "\n"
@@ -311,10 +316,19 @@ function countChars() {
       for (let c = 0; c < TestLogic.input.getHistory(i).length; c++) {
         if (c < word.length) {
           //on char that still has a word list pair
-          if (TestLogic.input.getHistory(i)[c] == word[c]) {
-            correctChars++;
+          if (Config.language.split("_")[0] == "vietnamese") {
+            if (TestLogic.input.getHistory(i)[c] == word[c]) {
+              correctChars += TestLogic.vn2telex(word[c]).length;
+            } else {
+              incorrectChars++;
+              missedChars += TestLogic.vn2telex(word[c]).length - 1;
+            }
           } else {
-            incorrectChars++;
+            if (TestLogic.input.getHistory(i)[c] == word[c]) {
+              correctChars++;
+            } else {
+              incorrectChars++;
+            }
           }
         } else {
           //on char that is extra
@@ -331,10 +345,19 @@ function countChars() {
       for (let c = 0; c < word.length; c++) {
         if (c < TestLogic.input.getHistory(i).length) {
           //on char that still has a word list pair
-          if (TestLogic.input.getHistory(i)[c] == word[c]) {
-            toAdd.correct++;
+          if (Config.language.split("_")[0] == "vietnamese") {
+            if (TestLogic.input.getHistory(i)[c] == word[c]) {
+              toAdd.correct += TestLogic.vn2telex(word[c]).length;
+            } else {
+              toAdd.incorrect++;
+              toAdd.missed += TestLogic.vn2telex(word[c]).length - 1;
+            }
           } else {
-            toAdd.incorrect++;
+            if (TestLogic.input.getHistory(i)[c] == word[c]) {
+              toAdd.correct++;
+            } else {
+              toAdd.incorrect++;
+            }
           }
         } else {
           //on char that is extra

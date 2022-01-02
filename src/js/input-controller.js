@@ -444,6 +444,76 @@ function handleSpace(event, isEnter) {
   }
 }
 
+let vn_char_map = {
+  á: ["a", "á"],
+  à: ["a", "à"],
+  ả: ["a", "ả"],
+  ã: ["a", "ã"],
+  ạ: ["a", "ạ"],
+  ắ: ["a", "á", "ă", "ắ"],
+  ằ: ["a", "à", "ă", "ằ"],
+  ẳ: ["a", "ả", "ă", "ẳ"],
+  ẵ: ["a", "ã", "ă", "ẵ"],
+  ặ: ["a", "ạ", "ă", "ặ"],
+  ă: ["a", "ă"],
+  ấ: ["a", "á", "â", "ấ"],
+  ầ: ["a", "à", "â", "ầ"],
+  ẩ: ["a", "ả", "â", "ẩ"],
+  ẫ: ["a", "ã", "â", "ẫ"],
+  ậ: ["a", "ạ", "â", "ậ"],
+  â: ["a", "â"],
+  đ: ["d", "đ"],
+  é: ["e", "é"],
+  è: ["e", "è"],
+  ẻ: ["e", "ẻ"],
+  ẽ: ["e", "ẽ"],
+  ẹ: ["e", "ẹ"],
+  ế: ["e", "é", "ê", "ế"],
+  ề: ["e", "è", "ê", "ề"],
+  ể: ["e", "ẻ", "ê", "ể"],
+  ễ: ["e", "ẽ", "ê", "ễ"],
+  ệ: ["e", "ẹ", "ê", "ệ"],
+  ê: ["e", "ê"],
+  í: ["i", "í"],
+  ì: ["i", "ì"],
+  ỉ: ["i", "ỉ"],
+  ĩ: ["i", "ĩ"],
+  ị: ["i", "ị"],
+  ó: ["o", "ó"],
+  ò: ["o", "ò"],
+  ỏ: ["o", "ỏ"],
+  õ: ["o", "õ"],
+  ọ: ["o", "ọ"],
+  ố: ["o", "ó", "ô", "ố"],
+  ồ: ["o", "ò", "ô", "ồ"],
+  ổ: ["o", "ỏ", "ô", "ổ"],
+  ỗ: ["o", "õ", "ô", "ỗ"],
+  ộ: ["o", "ọ", "ô", "ộ"],
+  ô: ["o", "ô"],
+  ớ: ["o", "ó", "ơ", "ớ"],
+  ờ: ["o", "ò", "ơ", "ờ"],
+  ở: ["o", "ỏ", "ơ", "ở"],
+  ỡ: ["o", "õ", "ơ", "ỡ"],
+  ợ: ["o", "ọ", "ơ", "ợ"],
+  ơ: ["o", "ơ"],
+  ú: ["u", "ú"],
+  ù: ["u", "ù"],
+  ủ: ["u", "ủ"],
+  ũ: ["u", "ũ"],
+  ụ: ["u", "ụ"],
+  ứ: ["u", "ú", "ư", "ứ"],
+  ừ: ["u", "ù", "ư", "ừ"],
+  ử: ["u", "ủ", "ư", "ử"],
+  ữ: ["u", "ũ", "ư", "ữ"],
+  ự: ["u", "ụ", "ư", "ự"],
+  ư: ["u", "ư"],
+  ý: ["y", "ý"],
+  ỳ: ["y", "ỳ"],
+  ỷ: ["y", "ỷ"],
+  ỹ: ["y", "ỹ"],
+  ỵ: ["y", "ỵ"],
+};
+
 function handleAlpha(event) {
   if (
     [
@@ -642,6 +712,21 @@ function handleAlpha(event) {
     thisCharCorrect = true;
   }
 
+  let dummyChar = false;
+  if (Config.language.split("_")[0] == "vietnamese") {
+    if (event.key == " ") {
+      dummyChar = true;
+      thisCharCorrect = true;
+    } else {
+      let _n_chars = vn_char_map[nextCharInWord] || [nextCharInWord];
+      if (_n_chars.indexOf(event.key) >= 0) {
+        thisCharCorrect = true;
+      } else {
+        thisCharCorrect = false;
+      }
+    }
+  }
+
   if (
     Config.oppositeShiftMode === "on" &&
     ShiftTracker.isUsingOppositeShift(originalEvent) === false
@@ -649,7 +734,9 @@ function handleAlpha(event) {
     thisCharCorrect = false;
   }
 
-  MonkeyPower.addPower(thisCharCorrect);
+  if (!dummyChar) {
+    MonkeyPower.addPower(thisCharCorrect);
+  }
 
   if (!thisCharCorrect) {
     TestStats.incrementAccuracy(false);
@@ -659,7 +746,9 @@ function handleAlpha(event) {
     thisCharCorrect = false;
     TestStats.pushMissedWord(TestLogic.words.getCurrent());
   } else {
-    TestStats.incrementAccuracy(true);
+    if (!dummyChar) {
+      TestStats.incrementAccuracy(true);
+    }
     thisCharCorrect = true;
     if (Config.mode == "zen") {
       //making the input visible to the user
@@ -668,15 +757,19 @@ function handleAlpha(event) {
       );
     }
   }
-  WeakSpot.updateScore(nextCharInWord, thisCharCorrect);
+  if (!dummyChar) {
+    WeakSpot.updateScore(nextCharInWord, thisCharCorrect);
+  }
 
-  if (thisCharCorrect) {
-    Sound.playClick(Config.playSoundOnClick);
-  } else {
-    if (!Config.playSoundOnError || Config.blindMode) {
+  if (!dummyChar) {
+    if (thisCharCorrect) {
       Sound.playClick(Config.playSoundOnClick);
     } else {
-      Sound.playError(Config.playSoundOnError);
+      if (!Config.playSoundOnError || Config.blindMode) {
+        Sound.playClick(Config.playSoundOnClick);
+      } else {
+        Sound.playError(Config.playSoundOnError);
+      }
     }
   }
 
@@ -701,20 +794,24 @@ function handleAlpha(event) {
       );
     }
   }
-  TestStats.incrementKeypressCount();
-  TestStats.updateLastKeypress();
-  TestStats.pushKeypressWord(TestLogic.words.currentIndex);
-  // currentKeypress.count++;
-  // currentKeypress.words.push(TestLogic.words.currentIndex);
+  if (!dummyChar) {
+    TestStats.incrementKeypressCount();
+    TestStats.updateLastKeypress();
+    TestStats.pushKeypressWord(TestLogic.words.currentIndex);
+    // currentKeypress.count++;
+    // currentKeypress.words.push(TestLogic.words.currentIndex);
+  }
 
   if (Config.stopOnError == "letter" && !thisCharCorrect) {
     return;
   }
 
-  Replay.addReplayEvent(
-    thisCharCorrect ? "correctLetter" : "incorrectLetter",
-    event.key
-  );
+  if (!dummyChar) {
+    Replay.addReplayEvent(
+      thisCharCorrect ? "correctLetter" : "incorrectLetter",
+      event.key
+    );
+  }
 
   //update the active word top, but only once
   if (

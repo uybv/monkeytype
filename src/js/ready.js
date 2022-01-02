@@ -22,11 +22,12 @@ $(document).ready(() => {
   if (Config.quickTab) {
     $("#restartTestButton").addClass("hidden");
   }
-  if (!window.localStorage.getItem("merchbannerclosed")) {
-    $(".merchBanner").removeClass("hidden");
-  } else {
-    $(".merchBanner").remove();
-  }
+  // if (!window.localStorage.getItem("merchbannerclosed")) {
+  //   $(".merchBanner").removeClass("hidden");
+  // } else {
+  //   $(".merchBanner").remove();
+  // }
+  $(".merchBanner").remove();
   $("#centerContent")
     .css("opacity", "0")
     .removeClass("hidden")
